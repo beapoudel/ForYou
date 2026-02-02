@@ -19,7 +19,7 @@
             min-height: 100vh;
             margin: 0;
             font-family: 'Comic Sans MS', 'cursive', sans-serif;
-            overflow-x: hidden; /* Prevents horizontal scroll if button moves out */
+            overflow: hidden;
             text-align: center;
         }
 
@@ -32,7 +32,7 @@
             width: 90%;
             max-width: 450px;
             position: relative;
-            z-index: 1;
+            z-index: 10;
         }
 
         h1 {
@@ -46,35 +46,31 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
-            min-height: 150px; /* Space for the growing button */
-            flex-wrap: wrap;
+            min-height: 150px;
             position: relative;
         }
 
         button {
-            padding: 15px 30px;
-            font-size: 1.2rem;
+            padding: 15px 25px;
+            font-size: 1.1rem;
             border-radius: 50px;
             border: none;
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.2s ease;
-            touch-action: manipulation; /* Improves mobile touch */
+            transition: transform 0.2s ease, background-color 0.3s;
+            touch-action: manipulation;
         }
 
         #yesBtn {
             background-color: var(--pink-main);
             color: white;
             box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
-            z-index: 10;
         }
 
         #noBtn {
             background-color: #bdbdbd;
             color: white;
-            /* Initially relative so it doesn't overlap */
-            position: relative; 
-            z-index: 5;
+            position: relative;
         }
 
         .hidden {
@@ -88,15 +84,9 @@
             margin-top: 15px;
         }
 
-        /* Mobile Specific Adjustments */
         @media (max-width: 480px) {
-            .container {
-                padding: 1.5rem;
-            }
-            button {
-                padding: 12px 24px;
-                font-size: 1rem;
-            }
+            .container { padding: 1.5rem; }
+            button { padding: 12px 20px; font-size: 1rem; }
         }
     </style>
 </head>
@@ -104,7 +94,7 @@
 
     <div class="container">
         <div id="questionArea">
-            <h1>Will you be my Valentine? 🌹</h1>
+            <h1 id="mainHeading">Will you be my Valentine? 🌹</h1>
             <div class="buttons-wrapper">
                 <button id="yesBtn">Yes! ✨</button>
                 <button id="noBtn">No 🥺</button>
@@ -125,13 +115,34 @@
         const successMessage = document.getElementById('successMessage');
         
         let yesScale = 1;
+        let noClickCount = 0;
 
-        function moveNoButton() {
-            // Switch to absolute positioning only after the first interaction
-            noBtn.style.position = 'fixed';
+        const phrases = [
+            "Really? 🤨",
+            "Think again! 🧐",
+            "Are you sure? 💔",
+            "Please? 🥺",
+            "Don't do this to me... 😭",
+            "You're breaking my heart! 😿",
+            "Look at the big button! Click that! 👉",
+            "I'm gonna cry... 🌊",
+            "Okay, now you're just being mean! 😤",
+            "Still no? 🤡"
+        ];
+
+        function handleNoInteraction() {
+            // Change the text based on how many times they've tried to click
+            if (noClickCount < phrases.length) {
+                noBtn.innerText = phrases[noClickCount];
+            } else {
+                noBtn.innerText = "Give up! Just say Yes! 😎";
+            }
             
-            // Randomly position within viewport, but keep away from edges
-            const padding = 50;
+            noClickCount++;
+
+            // Make the button jump
+            noBtn.style.position = 'fixed';
+            const padding = 60;
             const maxX = window.innerWidth - noBtn.offsetWidth - padding;
             const maxY = window.innerHeight - noBtn.offsetHeight - padding;
             
@@ -141,22 +152,24 @@
             noBtn.style.left = `${randomX}px`;
             noBtn.style.top = `${randomY}px`;
 
-            // Make the Yes button bigger
-            yesScale += 0.4;
+            // Make the Yes button grow
+            yesScale += 0.35;
             yesBtn.style.transform = `scale(${yesScale})`;
         }
 
-        // Event listeners for both mouse and touch
-        noBtn.addEventListener('mouseover', moveNoButton);
+        // Desktop hover
+        noBtn.addEventListener('mouseover', handleNoInteraction);
+        
+        // Mobile touch
         noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevents clicking the button on mobile
-            moveNoButton();
+            e.preventDefault();
+            handleNoInteraction();
         });
 
+        // Final "Yes" action
         yesBtn.addEventListener('click', () => {
             questionArea.classList.add('hidden');
             successMessage.classList.remove('hidden');
-            // Add some confetti effect if you want!
             document.body.style.backgroundColor = "#fce4ec";
         });
     </script>
